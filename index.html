@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community Protocol</title>
+    <title>Timed Mail Protocol</title>
     <style>
-        /* --- NEXTCLOUD THEME VARIABLES --- */
         :root {
             --nc-blue: #0082c9;
             --nc-bg: #181818;
@@ -15,7 +15,7 @@
             --nc-text-muted: #888888;
             --nc-success: #46BA61;
             --nc-danger: #E9322D;
-            --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         body {
@@ -29,7 +29,6 @@
             min-height: 100vh;
         }
 
-        /* --- HEADER --- */
         header {
             width: 100%;
             height: 50px;
@@ -37,40 +36,69 @@
             display: flex;
             align-items: center;
             padding: 0 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             position: fixed;
             top: 0;
             z-index: 100;
+            box-sizing: border-box;
         }
 
         .header-title {
             font-weight: bold;
             font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
         .container {
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             margin-top: 80px;
             padding: 20px;
+            box-sizing: border-box;
         }
 
-        /* --- CARDS --- */
         .card {
             background-color: var(--nc-card);
             border-radius: 10px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            margin-bottom: 5px;
         }
 
-        h2, h3 { margin-top: 0; font-weight: 600; }
-        label { display: block; margin-top: 15px; color: var(--nc-text-muted); font-size: 0.9em; margin-bottom: 5px; }
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
 
-        /* --- INPUTS & BUTTONS --- */
+        .card-actions button {
+            flex: 1;
+            /* Makes all buttons the same width */
+            margin: 0;
+            /* Removes that default top margin you had */
+            padding: 10px 5px;
+            /* Slightly slimmer padding for small screens */
+            font-size: 1.1rem;
+        }
+
+        /* Optional: Make the Delete button look distinct */
+        .btn-danger {
+            background-color: transparent;
+            border: 1px solid var(--nc-danger) !important;
+            color: var(--nc-danger) !important;
+        }
+
+        h2,
+        h3 {
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            color: var(--nc-text-muted);
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
         input {
             width: 100%;
             padding: 12px;
@@ -81,7 +109,7 @@
             box-sizing: border-box;
             font-size: 1rem;
         }
-        
+
         button {
             width: 100%;
             padding: 12px;
@@ -90,30 +118,37 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 15px;
-            transition: opacity 0.2s;
             font-size: 1rem;
         }
-        button:hover { opacity: 0.9; }
 
-        .btn-primary { background-color: var(--nc-blue); color: white; }
-        .btn-danger { background-color: var(--nc-danger); color: white; }
-        .btn-secondary { background-color: transparent; border: 1px solid var(--nc-border); color: var(--nc-text); }
+        .btn-primary {
+            background-color: var(--nc-blue);
+            color: white;
+        }
 
-        /* --- FILE BROWSER DROPDOWN --- */
-        .dropdown-wrapper { position: relative; }
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--nc-border);
+            color: var(--nc-text);
+        }
+
+        .dropdown-wrapper {
+            position: relative;
+        }
+
         .file-dropdown {
             position: absolute;
-            top: 100%; left: 0; right: 0;
+            top: 100%;
+            left: 0;
+            right: 0;
             background: #1a1a1a;
             border: 1px solid var(--nc-border);
-            border-radius: 0 0 5px 5px;
             max-height: 250px;
             overflow-y: auto;
             z-index: 50;
             display: none;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
-        .file-dropdown.open { display: block; }
+
         .dd-item {
             padding: 12px;
             border-bottom: 1px solid #333;
@@ -121,22 +156,22 @@
             display: flex;
             align-items: center;
         }
-        .dd-item:hover { background-color: #333; }
-        .dd-icon { margin-right: 12px; width: 24px; height: 24px; fill: var(--nc-text-muted); }
 
-        /* --- ID CARD --- */
-        .id-card {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-            border-left: 5px solid var(--nc-blue);
-            padding: 25px;
+        .dd-icon {
+            margin-right: 12px;
+            width: 24px;
+            height: 24px;
+            fill: var(--nc-text-muted);
         }
 
-        /* --- VIEWS --- */
-        .view { display: none; }
-        .view.active { display: block; animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .view {
+            display: none;
+        }
 
-        /* --- SPINNER --- */
+        .view.active {
+            display: block;
+        }
+
         .spinner {
             border: 4px solid rgba(255, 255, 255, 0.1);
             width: 36px;
@@ -146,392 +181,274 @@
             animation: spin 1s linear infinite;
             margin: 20px auto;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
+
 <body>
 
     <header>
-        <div class="header-title">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
-            Community
-        </div>
+        <div class="header-title">Timed Mail</div>
         <div style="flex-grow:1"></div>
         <div id="header-user" style="font-size:0.9rem; opacity:0.8;"></div>
+        <button onclick="resync()" title="Re-sync Identity"
+            style="background:none; border:none; cursor:pointer; margin:0; padding:0 0 0 15px; width:auto;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="white" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+        </button>
     </header>
 
     <div class="container">
-
-        <!-- LOADING -->
         <div id="view-loading" class="view active">
             <div class="spinner"></div>
-            <p style="text-align:center; color:#888;">Establishing Secure Link...</p>
         </div>
-
-        <!-- LOGIN (ZERO-CLICK) -->
-        <div id="view-login" class="view">
-            <div class="card" style="text-align:center;">
-                <h3>Identity Verification</h3>
-                <p style="color:#aaa; font-size:0.9rem; margin-bottom:20px;">
-                    Link your Nextcloud account to activate the Dead Man's Switch protocol.
-                </p>
-                
-                <button id="btn-connect" class="btn-primary" onclick="startAutoLogin()" style="display:flex; align-items:center; justify-content:center; gap:10px;">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="10" fill="white"/><path d="M10 5.5C10.8284 5.5 11.5 6.17157 11.5 7C11.5 7.82843 10.8284 8.5 10 8.5C9.17157 8.5 8.5 7.82843 8.5 7C8.5 6.17157 9.17157 5.5 10 5.5ZM10 11.5C10.8284 11.5 11.5 12.1716 11.5 13C11.5 13.8284 10.8284 14.5 10 14.5C9.17157 14.5 8.5 13.8284 8.5 13C8.5 12.1716 9.17157 11.5 10 11.5ZM5.5 8.5C6.32843 8.5 7 9.17157 7 10C7 10.8284 6.32843 11.5 5.5 11.5C4.67157 11.5 4 10.8284 4 10C4 9.17157 4.67157 8.5 5.5 8.5ZM14.5 8.5C15.3284 8.5 16 9.17157 16 10C16 10.8284 15.3284 11.5 14.5 11.5C13.6716 11.5 13 10.8284 13 10C13 9.17157 13.6716 8.5 14.5 8.5Z" fill="#0082c9"/></svg>
-                    CONNECT NEXTCLOUD
-                </button>
-                
-                <p id="login-status" style="margin-top:20px; font-size:0.8rem; color:var(--nc-blue); opacity:0; transition:opacity 0.5s;"></p>
-            </div>
-        </div>
-
-        <!-- DASHBOARD -->
-        <div id="view-dashboard" class="view">
-            
-            <!-- STATUS CARD -->
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>Protocol Status</h3>
-                    <span style="background:var(--nc-success); padding:4px 10px; border-radius:4px; font-size:0.8rem; color:black; font-weight:bold">ARMED</span>
-                </div>
-                <div style="text-align:center; margin: 25px 0;">
-                    <div style="font-size:0.8rem; color:#888;">LAST CHECK-IN</div>
-                    <div id="timer-display" style="font-size:1.5rem; font-weight:bold; color: white;">...</div>
-                    <div id="timer-countdown" style="font-size:0.9rem; color:var(--nc-blue); margin-top:5px;">Calculating...</div>
-                </div>
-                <button class="btn-primary" onclick="resetTimer()">I AM HERE (CHECK IN)</button>
-            </div>
-
-            <!-- FOLDER INFO CARD -->
-            <div class="card">
-                <h3>Protected Data</h3>
-                <div style="display:flex; align-items:center; margin-top:15px;">
-                    <svg style="width:30px; height:30px; fill:var(--nc-text-muted); margin-right:15px;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
-                    <div>
-                        <div id="lbl-folder" style="font-weight:bold;">Not Configured</div>
-                        <div id="lbl-recipient" style="font-size:0.8rem; color:var(--nc-text-muted);">Recipient: None</div>
-                    </div>
-                </div>
-                <button class="btn-secondary" onclick="switchView('view-config')" style="font-size:0.9rem;">Change Configuration</button>
-            </div>
-
-            <button class="btn-secondary" onclick="switchView('view-id')">View Digital ID</button>
-        </div>
-
-        <!-- CONFIGURATION (SMART BROWSER) -->
-        <div id="view-config" class="view">
-            <div class="card">
-                <h3>Configure Protocol</h3>
-                
-                <label>Target Folder (Browse)</label>
-                <div class="dropdown-wrapper">
-                    <input type="text" id="cfg-folder" placeholder="/Click to browse..." 
-                           autocomplete="off" 
-                           onclick="loadFiles(this.value)" 
-                           oninput="handleInput(this.value)">
-                    <div id="file-dropdown" class="file-dropdown"></div>
-                </div>
-                <p style="font-size:0.7em; color:#666; margin-top:5px;">Click to select a folder from your Nextcloud.</p>
-
-                <label>Recipient Email</label>
-                <input type="email" id="cfg-email" placeholder="friend@example.com">
-                
-                <label>Timeout (Days)</label>
-                <input type="number" id="cfg-days" value="30">
-                
-                <button class="btn-primary" onclick="saveConfig()">Save Changes</button>
-                <button class="btn-secondary" onclick="switchView('view-dashboard')">Cancel</button>
-            </div>
-        </div>
-
-        <!-- ID CARD -->
-        <div id="view-id" class="view">
-            <div class="card id-card">
-                <div style="display:flex; justify-content:space-between;">
-                    <div>
-                        <div style="font-size:0.8rem; color:#aaa; letter-spacing:1px; margin-bottom:5px;">FREYSTER NETWORK</div>
-                        <h2 style="font-size:1.8rem; margin:0;" id="id-username">USER</h2>
-                        <div style="color:var(--nc-blue); font-weight:bold; margin-top:5px;">VERIFIED MEMBER</div>
-                    </div>
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=Member" style="border-radius:5px; height:90px;">
-                </div>
-                <div style="margin-top:20px; font-size:0.8rem; color:#888;">
-                    MEMBER SINCE: <span id="id-joined">...</span>
-                </div>
-            </div>
-            <button class="btn-secondary" onclick="window.print()">Print / Save</button>
-            <button class="btn-secondary" onclick="switchView('view-dashboard')">Back</button>
-        </div>
-
+        <div id="view-login" class="view"></div>
+        <div id="view-dashboard" class="view"></div>
+        <div id="view-config" class="view"></div>
     </div>
 
     <script>
         const API_URL = "https://api.freyster.dev/takt";
         let currentUser = null;
-        let typingTimer;
 
-        // --- INIT ---
-        window.onload = async function() {
-            const params = new URLSearchParams(window.location.search);
-            const uid = params.get('uid');
-
+        // --- INIT & CORE LOGIC ---
+        window.onload = async () => {
+            const uid = new URLSearchParams(window.location.search).get('uid');
             if (uid) {
                 currentUser = uid;
                 document.getElementById('header-user').innerText = uid;
                 await checkStatus();
             } else {
-                // Testing Mode or Error
-                document.getElementById('view-loading').innerHTML = 
-                    "<p style='text-align:center'>No User ID detected.<br>Please open via Nextcloud.</p>";
+                document.getElementById('view-loading').innerHTML = "<p style='text-align:center'>Please open via Nextcloud.</p>";
             }
         };
 
-        function switchView(id) {
-            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+        const switchView = id => {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-        }
-
-        // --- CORE DATA LOGIC ---
+        };
         async function checkStatus() {
             try {
-                const res = await fetch(`${API_URL}/data`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: currentUser })
-                });
+                const res = await fetch(`${API_URL}/data?username=${currentUser}`);
+                const payload = await res.json();
 
-                if (res.status === 200) {
-                    populateData(await res.json());
-                    switchView('view-dashboard');
+                // If backend says Unauthorized OR if we have 0 packages, force login
+                if (res.status === 401 || (payload.packages && payload.packages.length === 0)) {
+                    renderLogin();
+                    return;
+                }
+
+                if (res.ok) {
+                    renderDashboard(payload.packages);
                 } else {
-                    switchView('view-login');
+                    renderLogin();
                 }
             } catch (e) {
-                // If API is down or unreachable
                 console.error(e);
-                alert("Connection to Raspberry Pi Failed.");
+                alert("Connection Failed. Check if server.py is running.");
             }
         }
 
-        function populateData(d) {
-            // Timer Calculation
-            const lastReset = new Date(d.last_reset);
-            document.getElementById('timer-display').innerText = lastReset.toLocaleDateString();
+        async function deleteProtocol(pkgId) {
+            if (!confirm("Are you sure you want to delete this protocol? This cannot be undone.")) return;
+
+            await fetch(`${API_URL}/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: pkgId, username: currentUser })
+            });
+            checkStatus(); // Refresh the list
+        }
+
+        function resync() {
+            if (confirm("This will re-sync your session with the server. If you are having issues, this can help. Continue?")) {
+                // This is the simplest 'logout'. It forces a fresh check against the backend.
+                switchView('view-loading');
+                checkStatus();
+            }
+        }
+
+        // --- RENDER FUNCTIONS ---
+        function renderLogin() {
+            document.getElementById('view-login').innerHTML = `
+                <div class="card" style="text-align:center;">
+                    <h3>Identity Verification</h3>
+                    <p style="color:#aaa;">Link your Nextcloud account to activate the protocol.</p>
+                    <button class="btn-primary" onclick="startAutoLogin()">Connect via Nextcloud</button>
+                    <p id="login-status" style="margin-top:20px; font-size:0.8rem;"></p>
+                </div>`;
+            switchView('view-login');
+        }
+        function renderDashboard(packages) {
+            let html = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2 style="margin:0;">Protocols</h2>
+            <button class="btn-primary" style="width:auto; margin:0; padding: 8px 15px;" 
+                onclick="renderConfig('', '', 30, null, 'New Protocol')">+ New</button>
+        </div>
+    `;
+
+            if (packages.length === 0) {
+                html += `<div class="card" style="text-align:center; color:#888;">No active protocols. Click "New" to start.</div>`;
+            }
+
+            packages.forEach(pkg => {
+                const deadline = new Date(pkg.last_reset);
+                deadline.setDate(deadline.getDate() + pkg.timeout_days);
+                const diffDays = Math.ceil((deadline - new Date()) / (1000 * 60 * 60 * 24));
+                const statusColor = pkg.is_triggered ? 'var(--nc-danger)' : (diffDays <= 2 ? 'orange' : 'var(--nc-success)');
+
+                html += `
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <h3 style="margin-bottom:5px;">${pkg.package_name || 'Unnamed Protocol'}</h3>
+                        <div style="font-size:0.8rem; color:#888;">Folder: ${pkg.target_folder || 'Not Set'}</div>
+                    </div>
+                    <span style="background:${statusColor}; padding:4px 10px; border-radius:4px; font-size:0.7rem; color:black; font-weight:bold;">
+                        ${pkg.is_triggered ? 'TRIGGERED' : 'ARMED'}
+                    </span>
+                </div>
+                
+                <div style="text-align:center; margin: 20px 0;">
+                    <div style="font-size:0.7rem; color:#888; text-transform:uppercase;">Next Deadline</div>
+                    <div style="font-size:1.2rem; font-weight:bold;">${deadline.toLocaleDateString()}</div>
+                    <div style="font-size:0.9rem; color:${statusColor}; margin-top:5px;">
+                        ${pkg.is_triggered ? 'Files Released' : (diffDays > 0 ? `${diffDays} days remaining` : 'EXPIRED')}
+                    </div>
+                </div>
+                <div class="card">
+                      <div class="card-actions">
+                        ${!pkg.is_triggered ? `
+                          <button class="btn-primary" onclick="resetTimer(${pkg.id})">Check In</button>
+                       ` : ''}
+                        <button class="btn-secondary" onclick="renderConfig('${pkg.target_folder}', '${pkg.recipient_email}', ${pkg.timeout_days}, ${pkg.id}, '${pkg.package_name}')">Edit</button>
+                        <button class="btn-danger" onclick="deleteProtocol(${pkg.id})">Delete</button>
+                    </div>
+                </div>
+            </div>
+        `;
+            });
+
+            document.getElementById('view-dashboard').innerHTML = html;
+            switchView('view-dashboard');
+        }
+        function renderConfig(folder, email, days, pkgId = null, pkgName = "") {
+            document.getElementById('view-config').innerHTML = `
+        <div class="card">
+            <h3>${pkgId ? 'Edit Protocol' : 'New Protocol'}</h3>
+            <label>Protocol Name</label>
+            <input type="text" id="cfg-name" value="${pkgName}" placeholder="e.g. My Secret Backup">
             
-            const now = new Date();
-            const deadline = new Date(lastReset);
-            deadline.setDate(deadline.getDate() + d.timeout_days);
-            const diffTime = deadline - now;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+            <label>Target Folder</label>
+            <div class="dropdown-wrapper">
+                <input type="text" id="cfg-folder" value="${folder}" placeholder="/Click to browse...">
+                <div id="file-dropdown" class="file-dropdown"></div>
+            </div>
             
-            const countEl = document.getElementById('timer-countdown');
-            if (diffDays > 0) {
-                countEl.innerText = `${diffDays} days remaining`;
-                countEl.style.color = "var(--nc-blue)";
-            } else {
-                countEl.innerText = "TRIGGERED / EXPIRED";
-                countEl.style.color = "var(--nc-danger)";
-            }
-
-            // Dashboard Info
-            document.getElementById('lbl-folder').innerText = d.folder || "Not Set";
-            document.getElementById('lbl-recipient').innerText = "Recipient: " + (d.recipient || "None");
-
-            // ID Card Info
-            document.getElementById('id-username').innerText = currentUser;
-            document.getElementById('id-joined').innerText = new Date(d.joined_date).toLocaleDateString();
-
-            // Config Form Pre-fill
-            document.getElementById('cfg-email').value = d.recipient || "";
-            document.getElementById('cfg-folder').value = d.folder || "";
-            document.getElementById('cfg-days').value = d.timeout_days || 30;
+            <label>Recipient Email</label>
+            <input type="email" id="cfg-email" value="${email}" placeholder="trustee@example.com">
+            
+            <label>Timeout (Days)</label>
+            <input type="number" id="cfg-days" value="${days}">
+            
+            <button class="btn-primary" onclick="saveConfig(${pkgId})">Save Protocol</button>
+            <button class="btn-secondary" onclick="checkStatus()">Cancel</button>
+        </div>`;
+            switchView('view-config');
+            const folderInput = document.getElementById('cfg-folder');
+            folderInput.onclick = () => loadFiles(folderInput.value);
         }
 
-        // --- FILE BROWSER LOGIC ---
-        function handleInput(val) {
-            clearTimeout(typingTimer);
-            if(val.endsWith('/')) {
-                loadFiles(val);
-            } else {
-                typingTimer = setTimeout(() => {
-                    // Try to list parent folder while typing
-                    const parent = val.substring(0, val.lastIndexOf('/') + 1) || "/";
-                    loadFiles(parent);
-                }, 600);
-            }
+        // --- ACTIONS ---
+        async function resetTimer(pkgId) {
+            await fetch(`${API_URL}/reset`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentUser, id: pkgId })
+            });
+            checkStatus();
         }
 
+        async function saveConfig(pkgId) {
+            // Get credentials from a hidden or global source if needed, 
+            // but for now the backend handles password storage per package.
+            const payload = {
+                id: pkgId,
+                username: currentUser,
+                package_name: document.getElementById('cfg-name').value,
+                target_folder: document.getElementById('cfg-folder').value,
+                recipient_email: document.getElementById('cfg-email').value,
+                timeout_days: parseInt(document.getElementById('cfg-days').value)
+            };
+            await fetch(`${API_URL}/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            checkStatus();
+        }
+
+        // --- FILE BROWSER ---
+        let typingTimer;
+        function handleInput(val) { clearTimeout(typingTimer); typingTimer = setTimeout(() => loadFiles(val.substring(0, val.lastIndexOf('/') + 1) || "/"), 500); }
         async function loadFiles(path) {
-            if(!path || path.trim() === "") path = "/";
-            
             const dd = document.getElementById('file-dropdown');
-            dd.innerHTML = '<div class="dd-item" style="color:#888; justify-content:center;">Loading...</div>';
-            dd.classList.add('open');
-
-            try {
-                const res = await fetch(`${API_URL}/files/list`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: currentUser, path: path })
-                });
-
-                const data = await res.json();
-                dd.innerHTML = '';
-
-                if(data.status === 'success') {
-                    // Option 1: Select Current Folder (if we are deep in structure)
-                    if(path !== "/") {
-                        const selectDiv = document.createElement('div');
-                        selectDiv.className = 'dd-item';
-                        selectDiv.style.borderBottom = "2px solid var(--nc-blue)";
-                        selectDiv.innerHTML = `<span style="font-weight:bold; color:var(--nc-blue)">✔ Select "${path}"</span>`;
-                        selectDiv.onclick = () => {
-                            document.getElementById('cfg-folder').value = path;
-                            dd.classList.remove('open');
-                        };
-                        dd.appendChild(selectDiv);
-
-                        // Option 2: Go Up
-                        const parent = path.split('/').slice(0, -2).join('/') + '/';
-                        addDropdownItem(".. (Go Up)", parent, true);
-                    }
-
-                    if(data.files.length === 0) dd.innerHTML += '<div class="dd-item" style="color:#666;">Empty Folder</div>';
-
-                    // List Files
-                    data.files.forEach(f => {
-                        addDropdownItem(f.name, f.path, f.is_folder);
-                    });
-                } else {
-                    dd.innerHTML = '<div class="dd-item" style="color:red">Folder not found</div>';
-                }
-            } catch(e) {
-                dd.innerHTML = '<div class="dd-item">Error loading files</div>';
-            }
+            dd.innerHTML = '<div class="dd-item" style="color:#888;">Loading...</div>';
+            dd.style.display = 'block';
+            const res = await fetch(`${API_URL}/files/list`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser, path: path }) });
+            const data = await res.json();
+            dd.innerHTML = '';
+            if (path !== "/") addDropdownItem(".. (Up)", path.split('/').slice(0, -2).join('/') + '/' || '/', true);
+            data.files.forEach(f => addDropdownItem(f.name, f.path, f.is_folder));
         }
-
         function addDropdownItem(name, path, isFolder) {
             const dd = document.getElementById('file-dropdown');
             const div = document.createElement('div');
             div.className = 'dd-item';
-            
-            const iconPath = isFolder 
-                ? 'M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z' 
-                : 'M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z';
-            
-            div.innerHTML = `
-                <svg class="dd-icon" viewBox="0 0 24 24" style="fill:${isFolder ? 'var(--nc-blue)' : '#888'}">
-                    <path d="${iconPath}"/>
-                </svg>
-                <span>${name}</span>
-            `;
-
+            const icon = isFolder ? 'M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z' : 'M6 2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z';
+            div.innerHTML = `<svg class="dd-icon" viewBox="0 0 24 24" style="fill:${isFolder ? 'var(--nc-blue)' : '#888'}"><path d="${icon}"/></svg><span>${name}</span>`;
             div.onclick = () => {
-                const input = document.getElementById('cfg-folder');
-                if (isFolder) {
-                    input.value = path; // Navigate In
-                    loadFiles(path);
-                } else {
-                    input.value = path; // Select File
-                    dd.classList.remove('open');
-                }
+                if (isFolder) { loadFiles(path); document.getElementById('cfg-folder').value = path; }
+                else { document.getElementById('cfg-folder').value = path; dd.style.display = 'none'; }
             };
             dd.appendChild(div);
         }
+        document.addEventListener('click', e => { if (!document.querySelector('.dropdown-wrapper')?.contains(e.target)) { const dd = document.getElementById('file-dropdown'); if (dd) dd.style.display = 'none'; } });
 
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(e) {
-            const wrap = document.querySelector('.dropdown-wrapper');
-            if (!wrap.contains(e.target)) {
-                document.getElementById('file-dropdown').classList.remove('open');
-            }
-        });
-
-        // --- ACTIONS ---
-        async function resetTimer() {
-            await fetch(`${API_URL}/reset`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: currentUser })
-            });
-            alert("Check-in Successful. Timer Reset.");
-            checkStatus();
-        }
-
-        async function saveConfig() {
-            const email = document.getElementById('cfg-email').value;
-            const folder = document.getElementById('cfg-folder').value;
-            const days = document.getElementById('cfg-days').value;
-
-            await fetch(`${API_URL}/update`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: currentUser, recipient: email, folder: folder, days: days })
-            });
-            alert("Protocol Configuration Saved.");
-            switchView('view-dashboard');
-            checkStatus();
-        }
-
-        // --- AUTH FLOW ---
+        // --- AUTH ---
         async function startAutoLogin() {
             const statusEl = document.getElementById('login-status');
-            const btn = document.getElementById('btn-connect');
-            
-            btn.disabled = true;
-            statusEl.style.opacity = 1;
-            statusEl.innerText = "Requesting Access from Nextcloud...";
-
-            try {
-                const res = await fetch(`${API_URL}/auth/start`, { method: 'POST' });
-                const data = await res.json();
-                
-                if (data.status === 'success') {
-                    statusEl.innerText = "Please click 'Grant Access' in the popup window...";
-                    
-                    // Open Popup
-                    const popup = window.open(data.login_url, 'nc_login', 'width=500,height=600');
-                    if(!popup) return alert("Popup Blocked! Please allow popups.");
-
-                    // Start Polling
-                    const pollInterval = setInterval(async () => {
-                        if (popup.closed) {
-                            clearInterval(pollInterval);
-                            btn.disabled = false;
-                            if(!statusEl.innerText.includes("Redirecting")) statusEl.innerText = "Setup Cancelled.";
-                            return;
-                        }
-
-                        const pollRes = await fetch(`${API_URL}/auth/poll`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ 
-                                token: data.poll_token, 
-                                endpoint: data.endpoint,
-                                username: currentUser
-                            })
-                        });
-                        
-                        const pollData = await pollRes.json();
-                        
-                        if (pollData.status === 'success') {
-                            clearInterval(pollInterval);
-                            popup.close();
-                            statusEl.innerText = "Success! Redirecting...";
-                            setTimeout(() => checkStatus(), 1000);
-                        }
-                    }, 2000); // Check every 2s
-
-                } else {
-                    alert("Server Error: " + data.message);
-                    btn.disabled = false;
-                }
-            } catch (e) {
-                alert("Connection Failed: " + e);
-                btn.disabled = false;
+            statusEl.innerText = "Contacting Nextcloud...";
+            const res = await fetch(`${API_URL}/auth/start`, { method: 'POST' });
+            const data = await res.json();
+            if (data.status === 'success') {
+                statusEl.innerText = "Please click 'Grant Access' in the popup...";
+                const popup = window.open(data.login_url, 'nc_login', 'width=500,height=600');
+                const poll = setInterval(async () => {
+                    if (popup.closed) { clearInterval(poll); statusEl.innerText = "Login cancelled."; return; }
+                    const pollRes = await fetch(`${API_URL}/auth/poll`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: data.poll_token, endpoint: data.endpoint, username: currentUser }) });
+                    if (pollRes.ok && (await pollRes.json()).status === 'success') {
+                        clearInterval(poll); popup.close();
+                        checkStatus();
+                    }
+                }, 2000);
             }
         }
     </script>
 </body>
+
 </html>
