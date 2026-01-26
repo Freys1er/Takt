@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Freyster Network Engine</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --nc-blue: #0082c9;
+            --nc-bg: #181818;
+            --nc-card: #222222;
+            --nc-border: #333333;
+            --nc-text: #ffffff;
+            --nc-text-muted: #888888;
+            --nc-success: #46BA61;
+            --nc-danger: #E9322D;
+            --font-stack: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --bg: var(--nc-bg);
+            --canvas: #1f1f1f;
+            --text: var(--nc-text);
+            --accent: var(--nc-blue);
+            --border: var(--nc-border);
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: var(--bg);
+            font-family: var(--font-stack);
+            color: var(--text);
+            user-select: none;
+            touch-action: none;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding-top: 50px;
+            box-sizing: border-box;
+        }
+
+        header {
+            width: 100%;
+            height: 50px;
+            background-color: var(--nc-blue);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 2000;
+            box-sizing: border-box;
+            color: white;
+        }
+
+        .header-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        #network-canvas {
+            flex-grow: 1;
+            background-color: var(--canvas);
+            background-image: radial-gradient(var(--nc-border) 1px, transparent 1px);
+            background-size: 30px 30px;
+            cursor: grab;
+        }
+
+        #network-canvas:active {
+            cursor: grabbing;
+        }
+
+        .floating-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .interactive {
+            pointer-events: auto;
+        }
+
+        .search-bar {
+            background: var(--nc-card);
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 8px 12px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-bar input {
+            background: transparent;
+            color: var(--nc-text);
+            outline: none;
+        }
+
+        .search-bar input::placeholder {
+            color: var(--nc-text-muted);
+        }
+
+        .search-bar button {
+            background: var(--nc-blue);
+            color: white;
+            border: none;
+        }
+
+        .tool-dock {
+            position: absolute;
+            bottom: 100px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 1000;
+        }
+
+        .tool-btn {
+            width: 56px;
+            height: 56px;
+            background: var(--nc-card);
+            border: 2px solid var(--border);
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            color: var(--nc-text-muted);
+        }
+
+        .tool-btn i {
+            font-size: 1.2rem;
+            margin-bottom: 2px;
+        }
+
+        .tool-btn span {
+            font-size: 8px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .tool-btn.active {
+            background: var(--nc-text);
+            color: white;
+            border-color: var(--nc-text);
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .tool-btn.active::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 12px;
+            height: 12px;
+            background: var(--nc-success);
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+
+        .status-container {
+            position: absolute;
+            bottom: 85px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .capital-display {
+            background: var(--nc-card);
+            border: 1px solid var(--border);
+            padding: 6px 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            pointer-events: auto;
+        }
+
+        .capital-display .text-blue-600 {
+            color: var(--nc-blue);
+        }
+
+        .map-mode-selector {
+            background: var(--nc-card);
+            border: 1px solid var(--border);
+            padding: 4px;
+            border-radius: 99px;
+            display: flex;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            pointer-events: auto;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border-radius: 99px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            transition: 0.2s;
+            color: var(--nc-text-muted);
+        }
+
+        .mode-btn.active {
+            background: var(--nc-text);
+            color: white;
+        }
+
+        .node circle {
+            stroke: #fff;
+            stroke-width: 3px;
+            transition: stroke 0.2s, stroke-width 0.2s;
+        }
+
+        .node text {
+            font-weight: 800;
+            pointer-events: none;
+            paint-order: stroke;
+            stroke: var(--nc-card);
+            stroke-width: 3px;
+            fill: var(--nc-text);
+        }
+
+        .link {
+            stroke: var(--nc-border);
+            stroke-opacity: 0.6;
+            stroke-width: 2px;
+            transition: stroke 0.2s;
+        }
+
+        #node-color {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .intel-panel,
+        .auth-panel,
+        .contacts-browser-panel {
+            position: absolute;
+            inset: 0;
+            background: var(--nc-card);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .intel-panel.active,
+        .auth-panel.active,
+        .contacts-browser-panel.active {
+            display: flex;
+        }
+
+        #intel-panel input,
+        #intel-panel textarea {
+            background-color: transparent;
+            color: var(--nc-text);
+            border-color: var(--nc-border);
+        }
+
+        #intel-panel input::placeholder,
+        #intel-panel textarea::placeholder {
+            color: var(--nc-text-muted);
+        }
+
+        #intel-panel .bg-blue-600 {
+            background-color: var(--nc-blue);
+        }
+
+        #intel-panel .text-blue-600 {
+            color: var(--nc-blue);
+        }
+
+        #intel-panel .border-blue-600 {
+            border-color: var(--nc-blue);
+        }
+
+        #intel-panel .text-slate-400 {
+            color: var(--nc-text-muted);
+        }
+
+        #intel-panel .bg-slate-50 {
+            background-color: #2e2e2e;
+        }
+
+        .confirm-purge {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .confirm-purge>div {
+            background: var(--nc-card);
+            border: 1px solid var(--nc-border);
+        }
+
+        #purge-screen .bg-red-50 {
+            background-color: rgba(233, 50, 45, 0.15);
+        }
+
+        #purge-screen .text-red-500 {
+            color: var(--nc-danger);
+        }
+
+        #purge-screen .bg-red-600 {
+            background-color: var(--nc-danger);
+        }
+
+        #purge-screen .text-slate-400 {
+            color: var(--nc-text-muted);
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 130, 201, 0.3);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--nc-blue);
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #view-loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            z-index: 2500;
+            flex-direction: column;
+            display: none;
+        }
+
+        #view-loading.active {
+            display: flex;
+        }
+
+        #view-loading p {
+            color: var(--nc-text-muted);
+            margin-top: 20px;
+        }
+
+        #nav-list {
+            background: var(--nc-card);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
+        #nav-list .p-4 {
+            color: var(--nc-text);
+        }
+
+        #nav-list .text-slate-800 {
+            color: var(--nc-text);
+        }
+
+        #nav-list .text-blue-600 {
+            color: var(--nc-blue);
+        }
+
+        .auth-panel .card {
+            background-color: var(--nc-card);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 5px;
+            text-align: center;
+            max-width: 400px;
+            margin: auto;
+        }
+
+        .auth-panel .btn-primary {
+            background-color: var(--nc-blue);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        .auth-panel p {
+            color: var(--nc-text-muted);
+        }
+
+        .contacts-browser-panel .file-list-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid var(--nc-border);
+            color: var(--nc-text);
+        }
+
+        .contacts-browser-panel .file-list-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+        }
+
+        .contacts-browser-panel .file-list-item .file-icon {
+            margin-right: 12px;
+            width: 24px;
+            height: 24px;
+            fill: var(--nc-text-muted);
+        }
+
+        .contacts-browser-panel .file-list-item.is-folder .file-icon {
+            fill: var(--nc-blue);
+        }
+
+        .contacts-browser-panel .file-list-item.is-contact-file {
+            background-color: rgba(70, 186, 97, 0.1);
+        }
+
+        .contacts-browser-panel .file-list-item.is-contact-file span {
+            color: var(--nc-success);
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-title">Freyster Network Engine</div>
+        <div style="flex-grow:1"></div>
+        <div id="header-user" style="font-size:0.9rem; opacity:0.8;"></div>
+    </header>
+
+    <div id="app">
+        <div id="view-loading" class="active">
+            <div class="spinner"></div>
+            <p>Loading network data...</p>
+        </div>
+
+        <!-- FOLDER PICKER MODAL -->
+        <div id="folder-picker" class="fixed inset-0 bg-black/90 z-[3000] hidden flex-col items-center justify-center">
+            <div class="bg-white text-black p-6 rounded-2xl w-full max-w-lg shadow-2xl">
+                <h2 class="text-xl font-black uppercase tracking-tighter mb-2">Select Source Folder</h2>
+                <p class="text-sm text-gray-500 mb-4">Choose where to sync your network contacts from.</p>
+
+                <div class="bg-gray-100 rounded-lg p-3 mb-4 flex items-center gap-2">
+                    <button onclick="navigateFolder('..')"
+                        class="px-2 py-1 bg-white rounded shadow text-xs font-bold"><i class="fa-solid fa-arrow-up"></i>
+                        Up</button>
+                    <div id="current-path-display" class="font-mono text-xs text-blue-600 font-bold truncate">/</div>
+                </div>
+
+                <div id="folder-list" class="h-64 overflow-y-auto border border-gray-200 rounded-lg mb-4">
+                    <!-- Folders inject here -->
+                </div>
+
+                <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
+                    <span class="text-xs text-gray-400 font-bold uppercase tracking-widest">Selection</span>
+                    <button onclick="confirmFolderSelection()"
+                        class="bg-blue-600 text-white px-6 py-3 rounded-xl font-black uppercase text-xs tracking-widest hover:scale-105 transition">
+                        Use This Folder
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- TOP NAVIGATION -->
+            <div class="floating-controls flex flex-col md:flex-row justify-between items-stretch md:items-start gap-4">
+                <div class="search-bar interactive">
+                    <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
+                    <input type="text" id="map-search" placeholder="Search contacts..."
+                        class="w-full outline-none text-sm font-semibold">
+                    <button onclick="createNewNode()"
+                        class="bg-black text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider">+
+                        ADD</button>
+                </div>
+                <button onclick="browseContacts()"
+                    class="interactive bg-white text-slate-700 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-md hover:bg-slate-100 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-address-book"></i>
+                    <span>Contacts</span>
+                </button>
+            </div>
+
+            <!-- MAIN VIEWPORT -->
+            <div id="network-canvas"></div>
+
+            <!-- TOOLBOX -->
+            <div class="tool-dock interactive">
+                <button id="tool-select" onclick="setAppMode('select')" class="tool-btn active">
+                    <i class="fa-solid fa-arrow-pointer"></i>
+                    <span>Select</span>
+                </button>
+                <button id="tool-link" onclick="setAppMode('link')" class="tool-btn">
+                    <i class="fa-solid fa-link"></i>
+                    <span>Connect</span>
+                </button>
+                <button id="tool-paint" onclick="setAppMode('paint')" class="tool-btn">
+                    <i class="fa-solid fa-palette"></i>
+                    <span>Paint</span>
+                    <input type="color" id="node-color" value="#0082c9" oninput="updateBrushPreview()">
+                </button>
+
+                <button onclick="openFolderPicker()"
+                    class="tool-btn mt-4 border-dashed border-slate-600 text-slate-500">
+                    <i class="fa-solid fa-folder-open"></i>
+                    <span>Source</span>
+                </button>
+
+            </div>
+
+            <!-- BOTTOM CONTROLS -->
+            <div class="status-container">
+                <!-- Capital Display moved from top -->
+                <div class="capital-display">
+                    <div class="text-[8px] text-slate-400 font-black uppercase tracking-widest">Network Capital</div>
+                    <div class="text-lg font-black text-blue-600 tracking-tighter" id="val-display">$0.00</div>
+                </div>
+
+                <!-- MAP LAYOUT MODES -->
+                <div class="map-mode-selector interactive">
+                    <button onclick="setMapLayout('force')" class="mode-btn active" id="layout-force">Map</button>
+                    <button onclick="setMapLayout('cluster')" class="mode-btn" id="layout-cluster">Capital</button>
+                    <button onclick="setMapLayout('value')" class="mode-btn" id="layout-value">Rank</button>
+                </div>
+            </div>
+
+            <!-- SEARCH LIST -->
+            <div id="nav-list"
+                class="absolute top-[60px] md:top-[80px] left-0 md:left-5 w-full md:max-w-[400px] bg-white border-b border-slate-200 shadow-2xl z-[1500] hidden">
+            </div>
+
+            <!-- INTEL PANEL -->
+            <div id="intel-panel" class="intel-panel">
+                <div class="p-4 flex justify-between items-center border-b border-slate-100">
+                    <button onclick="closeIntel()"
+                        class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400"><i
+                            class="fa-solid fa-xmark text-lg"></i></button>
+                    <h2 class="font-black text-[10px] uppercase tracking-[0.3em] text-slate-400">Synapse Data</h2>
+                    <button onclick="requestPurge()"
+                        class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-red-50 text-red-400"><i
+                            class="fa-solid fa-trash-can"></i></button>
+                </div>
+                <div class="flex-grow overflow-y-auto p-6 md:p-12 max-w-2xl mx-auto w-full">
+                    <div class="mb-8 flex items-start gap-4">
+                        <div class="flex-grow">
+                            <label
+                                class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Identify</label>
+                            <input type="text" id="intel-name"
+                                class="text-3xl md:text-5xl font-black block w-full border-none p-0 mt-2 focus:ring-0 placeholder:text-slate-200"
+                                placeholder="Unnamed">
+                        </div>
+                        <div class="pt-6">
+                            <input type="color" id="intel-color-picker"
+                                class="w-12 h-12 rounded-full cursor-pointer border-none bg-transparent">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div>
+                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Capital
+                                (CAD)</label>
+                            <div
+                                class="flex items-center gap-2 mt-2 border-b-2 border-slate-100 focus-within:border-blue-600 pb-2">
+                                <span class="text-xl font-black text-slate-300">$</span>
+                                <input type="number" id="intel-value"
+                                    class="text-2xl font-mono font-black text-blue-600 w-full outline-none bg-transparent"
+                                    placeholder="0">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Network
+                                Role</label>
+                            <input type="text" id="intel-role"
+                                class="text-xl font-bold border-b-2 border-slate-100 p-2 mt-2 w-full outline-none focus:border-blue-600"
+                                placeholder="e.g. Stakeholder">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Strategy
+                            Notes</label>
+                        <textarea id="intel-notes"
+                            class="w-full h-48 md:h-64 mt-4 p-5 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-medium text-slate-600 focus:bg-white transition-all leading-relaxed"
+                            placeholder="Confidential briefing..."></textarea>
+                    </div>
+                </div>
+                <div class="p-6 bg-white border-t border-slate-100">
+                    <button onclick="saveIntel()"
+                        class="w-full bg-blue-600 text-white py-5 rounded-xl font-black uppercase tracking-widest text-xs shadow-lg shadow-blue-100 transition-all active:scale-[0.97]">Commit
+                        Intelligence</button>
+                </div>
+            </div>
+
+            <!-- PURGE SCREEN -->
+            <div id="purge-screen" class="confirm-purge">
+                <div class="max-w-xs md:max-w-md p-8 bg-white rounded-3xl shadow-2xl border border-slate-100 mx-4">
+                    <div
+                        class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fa-solid fa-skull-crossbones text-3xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-black mb-4 tracking-tighter uppercase">Sever Link?</h1>
+                    <p class="text-slate-500 mb-8 leading-relaxed font-medium text-sm">Deleting this synapse will purge
+                        all associated financial tracking and network connections.</p>
+                    <div class="flex flex-col gap-2">
+                        <button onclick="executePurge()"
+                            class="bg-red-600 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest">Execute
+                            Purge</button>
+                        <button onclick="cancelPurge()"
+                            class="py-3 font-bold text-slate-400 uppercase text-[10px] tracking-widest">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AUTHENTICATION PANEL -->
+        <div id="auth-panel" class="auth-panel">
+            <div class="p-6 flex-grow flex flex-col justify-center items-center">
+                <div class="card bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm border border-slate-100 relative">
+
+                    <!-- Header -->
+                    <div class="text-center mb-6">
+                        <div
+                            class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                            <i class="fa-solid fa-fingerprint"></i>
+                        </div>
+                        <h3 class="font-black text-slate-800 uppercase tracking-wide">Identity Link</h3>
+                        <p class="text-xs text-slate-400 mt-1">Connect Freyster to Nextcloud</p>
+                    </div>
+
+                    <!-- Auto Login (Default) -->
+                    <div id="auth-auto-mode">
+                        <button
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2"
+                            onclick="startAutoLogin()">
+                            <i class="fa-solid fa-magic"></i>
+                            <span>Auto Connect</span>
+                        </button>
+
+                        <div class="my-4 flex items-center gap-2 opacity-50">
+                            <div class="h-px bg-slate-200 flex-grow"></div>
+                            <span class="text-[10px] uppercase font-bold text-slate-400">OR</span>
+                            <div class="h-px bg-slate-200 flex-grow"></div>
+                        </div>
+
+                        <button onclick="toggleAuthMode('manual')"
+                            class="w-full bg-slate-50 hover:bg-slate-100 text-slate-600 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">
+                            Enter App Password
+                        </button>
+                    </div>
+
+                    <!-- Manual Login (Hidden) -->
+                    <div id="auth-manual-mode" class="hidden">
+                        <div class="space-y-3">
+                            <div>
+                                <label
+                                    class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Username</label>
+                                <input type="text" id="manual-user"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm font-bold outline-none focus:border-blue-500 transition-colors">
+                            </div>
+                            <div>
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">App
+                                    Password</label>
+                                <input type="password" id="manual-pass" placeholder="xxxxx-xxxxx-xxxxx-xxxxx"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm font-bold outline-none focus:border-blue-500 transition-colors font-mono">
+                                <a href="https://cloud.freyster.dev/settings/user/security" target="_blank"
+                                    class="text-[9px] text-blue-500 font-bold ml-1 hover:underline">Generate in
+                                    Nextcloud <i class="fa-solid fa-external-link-alt"></i></a>
+                            </div>
+                        </div>
+
+                        <button onclick="submitManualAuth()"
+                            class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold mt-4 shadow-lg flex items-center justify-center gap-2">
+                            <span>Verify & Save</span>
+                        </button>
+
+                        <button onclick="toggleAuthMode('auto')"
+                            class="w-full mt-2 py-2 text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600">
+                            Cancel
+                        </button>
+                    </div>
+
+                    <!-- Status Area -->
+                    <div id="auth-status" class="mt-4 text-center text-xs font-bold min-h-[20px]"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTACTS BROWSER PANEL -->
+        <div id="contacts-browser-panel" class="contacts-browser-panel">
+            <div class="p-4 flex justify-between items-center border-b border-slate-100">
+                <button onclick="closeContactsBrowser()"
+                    class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400"><i
+                        class="fa-solid fa-xmark text-lg"></i></button>
+                <h2 class="font-black text-[10px] uppercase tracking-[0.3em] text-slate-400">Contacts Folder</h2>
+                <div class="w-10"></div>
+            </div>
+            <div class="flex-grow overflow-y-auto p-4 md:p-6" id="contacts-list">
+                <div class="text-center text-slate-500 py-8">Loading contacts...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_API_URL = "https://api.freyster.dev";
+        const NETWORK_API_URL = `${BASE_API_URL}/api/network`;
+        const TAKT_API_URL = `${BASE_API_URL}/takt`;
+        const NEXTCLOUD_BASE_URL = "https://cloud.freyster.dev";
+
+        let currentUser = null;
+        let debounceSaveTimer;
+
+        let nodes = [];
+        let links = [];
+        let currentMode = 'select';
+        let layoutType = 'force';
+        let selectedNode = null;
+        let linkSource = null;
+
+        let svg, container, simulation, linkLayer, nodeLayer;
+
+        async function init() {
+            const uid = new URLSearchParams(window.location.search).get('uid');
+            if (uid) {
+                currentUser = uid;
+                document.getElementById('header-user').innerText = uid;
+
+                const canvas = document.getElementById('network-canvas');
+                svg = d3.select("#network-canvas").append("svg").attr("width", "100%").attr("height", "100%");
+                container = svg.append("g");
+
+                const zoom = d3.zoom().scaleExtent([0.1, 10]).on("zoom", (e) => container.attr("transform", e.transform));
+                svg.call(zoom).on("dblclick.zoom", null);
+
+                linkLayer = container.append("g");
+                nodeLayer = container.append("g");
+
+                simulation = d3.forceSimulation(nodes)
+                    .force("link", d3.forceLink(links).id(d => d.id).distance(150))
+                    .force("charge", d3.forceManyBody().strength(-1000))
+                    .force("center", d3.forceCenter(canvas.clientWidth / 2, canvas.clientHeight / 2))
+                    .force("collision", d3.forceCollide().radius(d => 50 + Math.log10(d.value + 1) * 3))
+                    .on("tick", ticked);
+
+                document.getElementById('map-search').addEventListener('input', handleSearch);
+
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.search-bar') && !e.target.closest('#nav-list')) {
+                        document.getElementById('nav-list').classList.add('hidden');
+                    }
+                });
+
+                await performStrictSync();
+
+                updateBrushPreview();
+
+                window.addEventListener('resize', () => {
+                    simulation.force("center", d3.forceCenter(window.innerWidth / 2, window.innerHeight / 2));
+                    simulation.alpha(0.3).restart();
+                });
+
+            } else {
+                document.getElementById('view-loading').innerHTML = `
+                <p style='text-align:center; color:var(--nc-text-muted);'>
+                    Please open this application via Nextcloud for user authentication. (UID missing)
+                </p>`;
+            }
+        }
+
+
+        async function performStrictSync() {
+            switchAppView('view-loading');
+            try {
+                const res = await fetch(`${NETWORK_API_URL}/sync_load`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser })
+                });
+
+                // --- FIX START: Catch Auth Errors ---
+                if (res.status === 401) {
+                    console.warn("Auth required during sync.");
+                    openAuthPanel(); // Switch directly to login
+                    return;
+                }
+                // ------------------------------------
+
+                const data = await res.json();
+
+                // --- FIX START: Catch JSON Auth Errors ---
+                if (data.status === 'error' && data.message === 'Auth failed') {
+                    openAuthPanel();
+                    return;
+                }
+                // -----------------------------------------
+
+                if (data.status === 'setup_required') {
+                    document.getElementById('view-loading').classList.remove('active');
+                    openFolderPicker();
+                    return;
+                }
+
+                if (data.status === 'success') {
+                    nodes = data.nodes || [];
+                    links = data.links || [];
+
+                    // Randomize positions for new nodes (0,0)
+                    nodes.forEach(n => {
+                        if (n.x === 0 && n.y === 0) {
+                            n.x = window.innerWidth / 2 + (Math.random() * 200 - 100);
+                            n.y = window.innerHeight / 2 + (Math.random() * 200 - 100);
+                        }
+                    });
+
+                    simulation.nodes(nodes);
+                    simulation.force("link").links(links);
+                    simulation.alpha(1).restart();
+                    updateNetwork();
+                    updateGlobalValue();
+                    switchAppView('view-app'); // Stop loading
+                } else {
+                    // If it's a different error, show it instead of hanging
+                    document.getElementById('view-loading').innerHTML = `
+                    <p class="text-red-500 font-bold">Sync Error: ${data.message}</p>
+                    <button onclick="window.location.reload()" class="mt-4 text-xs underline">Retry</button>
+                `;
+                }
+            } catch (e) {
+                console.error("Sync failed", e);
+                document.getElementById('view-loading').innerHTML = `
+                <p class="text-red-500 font-bold">Connection Error</p>
+                <p class="text-xs text-gray-500">${e.message}</p>
+            `;
+            }
+        }
+
+
+        function openFolderPicker() {
+            document.getElementById('folder-picker').style.display = 'flex';
+            navigateFolder('/');
+        }
+
+        async function navigateFolder(path) {
+            if (path === '..') {
+                const parts = currentPath.split('/').filter(p => p);
+                parts.pop();
+                path = '/' + parts.join('/');
+                if (path === '') path = '/';
+            }
+
+            const list = document.getElementById('folder-list');
+            list.innerHTML = '<div class="p-4 text-center text-gray-400"><div class="spinner w-6 h-6 border-2"></div></div>';
+
+            try {
+                const res = await fetch(`${NETWORK_API_URL}/list_folders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser, path: path })
+                });
+
+                // --- FIX: Handle Auth in Folder Picker ---
+                if (res.status === 401) {
+                    document.getElementById('folder-picker').style.display = 'none';
+                    openAuthPanel();
+                    return;
+                }
+                // -----------------------------------------
+
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    currentPath = path;
+                    document.getElementById('current-path-display').innerText = currentPath;
+
+                    list.innerHTML = '';
+                    if (data.folders.length === 0) {
+                        list.innerHTML = '<div class="p-4 text-center text-xs text-gray-400 font-bold">Empty Folder</div>';
+                    }
+
+                    data.folders.forEach(f => {
+                        const el = document.createElement('div');
+                        el.className = "p-3 border-b border-gray-100 hover:bg-blue-50 cursor-pointer flex items-center gap-3";
+                        el.innerHTML = `<i class="fa-solid fa-folder text-blue-400"></i> <span class="text-sm font-bold text-gray-700">${f.name}</span>`;
+                        el.onclick = () => navigateFolder(f.path);
+                        list.appendChild(el);
+                    });
+                } else {
+                    list.innerHTML = `<div class="p-4 text-red-500 text-xs">${data.message}</div>`;
+                }
+            } catch (e) {
+                list.innerHTML = `<div class="p-4 text-red-500 text-xs">${e.message}</div>`;
+            }
+        }
+
+        async function confirmFolderSelection() {
+            // Save preference
+            await fetch(`${NETWORK_API_URL}/settings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentUser, folder: currentPath })
+            });
+
+            document.getElementById('folder-picker').style.display = 'none';
+
+            // Reload everything based on this new truth
+            nodes = [];
+            links = [];
+            updateNetwork();
+            performStrictSync();
+        }
+
+
+        function switchAppView(id) {
+            document.getElementById('view-loading').classList.remove('active');
+            document.getElementById('intel-panel').classList.remove('active');
+            document.getElementById('auth-panel').classList.remove('active');
+            document.getElementById('contacts-browser-panel').classList.remove('active');
+            document.getElementById('purge-screen').style.display = 'none';
+
+            if (id === 'view-app') {
+            } else if (id === 'view-loading') {
+                document.getElementById('view-loading').classList.add('active');
+            } else if (id === 'intel-panel') {
+                document.getElementById('intel-panel').classList.add('active');
+            } else if (id === 'auth-panel') {
+                document.getElementById('auth-panel').classList.add('active');
+            } else if (id === 'contacts-browser-panel') {
+                document.getElementById('contacts-browser-panel').classList.add('active');
+            }
+        }
+
+
+        async function loadNetworkData() {
+            switchAppView('view-loading');
+            try {
+                const res = await fetch(`${NETWORK_API_URL}/?username=${currentUser}`);
+
+                if (res.status === 401) {
+                    console.warn("Network Engine: Authentication required via Nextcloud (loadData).");
+                    document.getElementById('view-loading').innerHTML = `
+                    <p style='text-align:center; color:var(--nc-text-muted);'>
+                        Authentication required. Please connect via Nextcloud.
+                    </p>`;
+                    openAuthPanel();
+                    return;
+                }
+
+                if (!res.ok) {
+                    if (res.status === 404) {
+                        nodes = [{ id: 'core_frey', name: 'Liam Frey', role: 'Founder', value: 1000000, notes: 'System Admin.', color: '#000000', x: window.innerWidth / 2, y: window.innerHeight / 2 }];
+                        links = [];
+                        console.log("Network Engine: No data found, initialized with default node.");
+                    } else {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                } else {
+                    const data = await res.json();
+                    nodes = data.nodes || [];
+                    links = data.links || [];
+                    console.log("Network Engine: Data loaded successfully.");
+                }
+
+                simulation.nodes(nodes);
+                simulation.force("link").links(links);
+                simulation.alpha(1).restart();
+
+                updateNetwork();
+                updateGlobalValue();
+            } catch (e) {
+                console.error("Network Engine: Failed to load network data:", e);
+                document.getElementById('view-loading').innerHTML = `
+                <p style='text-align:center; color:var(--nc-danger);'>
+                    Error loading network data: ${e.message}.
+                    <br>Starting with default node.
+                </p>`;
+                nodes = [{ id: 'core_frey', name: 'Liam Frey', role: 'Founder', value: 1000000, notes: 'System Admin.', color: '#000000', x: window.innerWidth / 2, y: window.innerHeight / 2 }];
+                links = [];
+                simulation.nodes(nodes);
+                simulation.force("link").links(links);
+                simulation.alpha(1).restart();
+                updateNetwork();
+                updateGlobalValue();
+            } finally {
+                simulation.on("end", () => {
+                    if (!document.getElementById('auth-panel').classList.contains('active')) {
+                        switchAppView('view-app');
+                    }
+                    simulation.on("end", null);
+                });
+            }
+        }
+
+        function saveNetworkData() {
+            clearTimeout(debounceSaveTimer);
+            debounceSaveTimer = setTimeout(async () => {
+                console.log("Saving network data...");
+                try {
+                    const serializableLinks = links.map(l => ({
+                        source: typeof l.source === 'object' ? l.source.id : l.source,
+                        target: typeof l.target === 'object' ? l.target.id : l.target
+                    }));
+
+                    const payload = {
+                        username: currentUser,
+                        nodes: nodes,
+                        links: serializableLinks
+                    };
+                    const res = await fetch(`${NETWORK_API_URL}/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.status === 401) {
+                        console.warn("Network Engine: Authentication required to save data.");
+                        openAuthPanel();
+                        return;
+                    }
+
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    console.log("Network data saved successfully.");
+                } catch (e) {
+                    console.error("Network Engine: Failed to save network data:", e);
+                }
+            }, 1000);
+        }
+
+        function ticked() {
+            linkLayer.selectAll(".link")
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+            nodeLayer.selectAll(".node").attr("transform", d => `translate(${d.x},${d.y})`);
+        }
+
+        function setAppMode(mode) {
+            currentMode = mode;
+            linkSource = null;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tool-${mode}`).classList.add('active');
+            nodeLayer.selectAll("circle").attr("stroke", "#fff").attr("stroke-width", "3px");
+            if (mode === 'paint') {
+                document.getElementById('node-color').click();
+            }
+        }
+
+        function updateBrushPreview() {
+            const color = document.getElementById('node-color').value;
+            document.getElementById('tool-paint').style.color = color;
+        }
+
+        function updateNetwork() {
+            const l = linkLayer.selectAll(".link").data(links, d => `${d.source.id || d.source}-${d.target.id || d.target}`);
+            l.exit().remove();
+            l.enter().append("line").attr("class", "link");
+
+            const n = nodeLayer.selectAll(".node").data(nodes, d => d.id);
+            n.exit().remove();
+
+            const g = n.enter().append("g")
+                .attr("class", "node")
+                .on("click", (e, d) => {
+                    if (currentMode === 'link') {
+                        handleLinkingMode(d);
+                    } else if (currentMode === 'paint') {
+                        handlePaintingMode(d, e.currentTarget);
+                    } else {
+                        openIntel(d);
+                    }
+                })
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+            g.append("circle")
+                .attr("r", d => 15 + Math.log10(d.value + 1) * 2)
+                .attr("fill", d => d.color || '#0082c9');
+
+            g.append("text")
+                .attr("dy", d => 30 + Math.log10(d.value + 1) * 2)
+                .attr("text-anchor", "middle")
+                .text(d => d.name);
+
+            applyForces();
+        }
+
+        function handleLinkingMode(d) {
+            if (!linkSource) {
+                linkSource = d;
+                nodeLayer.selectAll("circle").filter(n => n.id === d.id)
+                    .attr("stroke", "#22c55e")
+                    .attr("stroke-width", "6px");
+            } else {
+                if (linkSource.id !== d.id) {
+                    const existingIndex = links.findIndex(l =>
+                        (l.source.id === linkSource.id && l.target.id === d.id) ||
+                        (l.source.id === d.id && l.target.id === linkSource.id) ||
+                        (l.source === linkSource.id && l.target === d.id) ||
+                        (l.source === d.id && l.target === linkSource.id)
+                    );
+                    if (existingIndex > -1) {
+                        links.splice(existingIndex, 1);
+                    } else {
+                        links.push({ source: linkSource.id, target: d.id });
+                    }
+                    updateNetwork();
+                    saveNetworkData();
+                }
+                linkSource = null;
+                nodeLayer.selectAll("circle").attr("stroke", "#fff").attr("stroke-width", "3px");
+            }
+        }
+
+        function handlePaintingMode(d, element) {
+            const brushColor = document.getElementById('node-color').value;
+            d.color = brushColor;
+            d3.select(element).select("circle").attr("fill", d.color);
+            saveNetworkData();
+        }
+
+        function applyForces() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            if (layoutType === 'cluster') {
+                simulation.force("x", d3.forceX(d => d.value > 100000 ? width * 0.7 : width * 0.3).strength(0.2));
+                simulation.force("y", d3.forceY(height / 2).strength(0.1));
+            } else if (layoutType === 'value') {
+                simulation.force("y", d3.forceY(d => height - (Math.sqrt(d.value) * 0.4) - 80).strength(0.5));
+                simulation.force("x", d3.forceX(width / 2).strength(0.05));
+            } else {
+                simulation.force("x", null);
+                simulation.force("y", null);
+            }
+            simulation.nodes(nodes);
+            simulation.force("link").links(links);
+            simulation.alpha(0.5).restart();
+        }
+
+        function setMapLayout(type) {
+            layoutType = type;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`layout-${type}`).classList.add('active');
+            applyForces();
+        }
+
+        function handleSearch(e) {
+            const val = e.target.value.toLowerCase();
+            const list = document.getElementById('nav-list');
+            list.innerHTML = '';
+            if (!val) { list.classList.add('hidden'); return; }
+            list.classList.remove('hidden');
+            const matches = nodes.filter(n => n.name.toLowerCase().includes(val) || (n.role && n.role.toLowerCase().includes(val)));
+            matches.forEach(m => {
+                const item = document.createElement('div');
+                item.className = "p-4 border-b border-slate-50 hover:bg-slate-50 flex justify-between items-center";
+                item.innerHTML = `
+                <div>
+                    <div class="font-bold text-sm text-slate-800">${m.name}</div>
+                    <div class="text-[9px] text-slate-400 uppercase font-black">${m.role || 'N/A'}</div>
+                </div>
+                <div class="text-xs font-mono font-bold text-blue-600">$${(m.value / 1000).toFixed(0)}k</div>
+            `;
+                item.onclick = () => {
+                    list.classList.add('hidden');
+                    document.getElementById('map-search').value = '';
+                    focusNode(m);
+                    openIntel(m);
+                };
+                list.appendChild(item);
+            });
+        }
+
+        function focusNode(node) {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            svg.transition().duration(800).call(
+                d3.zoom().transform,
+                d3.zoomIdentity.translate(width / 2, height / 2).scale(1.5).translate(-node.x, -node.y)
+            );
+        }
+
+        function createNewNode() {
+            const newNode = {
+                id: 'n' + Date.now(),
+                name: "Target " + (nodes.length),
+                role: "Prospect",
+                value: 0,
+                notes: "",
+                x: window.innerWidth / 2,
+                y: window.innerHeight / 2,
+                color: document.getElementById('node-color').value || '#0082c9'
+            };
+            nodes.push(newNode);
+            updateNetwork();
+            openIntel(newNode);
+            saveNetworkData();
+        }
+
+        function openIntel(node) {
+            selectedNode = node;
+            document.getElementById('intel-name').value = node.name;
+            document.getElementById('intel-value').value = node.value;
+            document.getElementById('intel-role').value = node.role;
+            document.getElementById('intel-notes').value = node.notes;
+            document.getElementById('intel-color-picker').value = node.color || '#0082c9';
+            switchAppView('intel-panel');
+        }
+
+        function closeIntel() {
+            switchAppView('view-app');
+            selectedNode = null;
+        }
+
+        async function saveIntel() {
+            if (!selectedNode) return;
+
+            // 1. Update the Local Node Object
+            selectedNode.name = document.getElementById('intel-name').value || "Unnamed";
+            selectedNode.value = parseInt(document.getElementById('intel-value').value) || 0;
+            selectedNode.role = document.getElementById('intel-role').value || "Lead";
+            selectedNode.notes = document.getElementById('intel-notes').value;
+            selectedNode.color = document.getElementById('intel-color-picker').value;
+
+            // 2. Update Visuals (D3)
+            nodeLayer.selectAll("text").filter(n => n.id === selectedNode.id).text(selectedNode.name);
+            nodeLayer.selectAll("circle").filter(n => n.id === selectedNode.id)
+                .attr("r", 15 + Math.log10(selectedNode.value + 1) * 2)
+                .attr("fill", selectedNode.color);
+
+            updateGlobalValue();
+            applyForces();
+
+            // --- CRITICAL FIX START ---
+
+            // Capture the node reference BEFORE closing the panel
+            // (Because closeIntel() sets selectedNode = null)
+            const nodeToSave = selectedNode;
+
+            closeIntel(); // Now it's safe to close the UI
+
+            // Save to Local DB
+            saveNetworkData();
+
+            // Sync to Nextcloud
+            console.log("Syncing contact to Nextcloud...");
+            try {
+                const res = await fetch(`${NETWORK_API_URL}/save_contact`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: currentUser,
+                        node: nodeToSave, // Use the captured reference
+                        filePath: nodeToSave.filePath || null
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    console.log(`Contact saved to: ${data.path}`);
+                    // Update the original object (arrays pass by reference, so this works)
+                    nodeToSave.filePath = data.path;
+                    saveNetworkData(); // Save the new path to DB
+                } else {
+                    console.warn("Sync failed:", data.message);
+                }
+            } catch (e) {
+                console.error("Contact Sync Error:", e);
+            }
+            // --- CRITICAL FIX END ---
+        }
+
+        function requestPurge() { document.getElementById('purge-screen').style.display = 'flex'; }
+        function cancelPurge() { document.getElementById('purge-screen').style.display = 'none'; }
+        function executePurge() {
+            if (!selectedNode) return;
+            nodes = nodes.filter(n => n.id !== selectedNode.id);
+            links = links.filter(l =>
+                (typeof l.source === 'object' ? l.source.id : l.source) !== selectedNode.id &&
+                (typeof l.target === 'object' ? l.target.id : l.target) !== selectedNode.id
+            );
+            updateNetwork();
+            updateGlobalValue();
+            cancelPurge();
+            closeIntel();
+            saveNetworkData();
+        }
+
+        function updateGlobalValue() {
+            const total = nodes.reduce((sum, n) => sum + (n.value || 0), 0);
+            document.getElementById('val-display').innerText = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(total);
+        }
+
+        function dragstarted(e, d) {
+            if (currentMode !== 'select') return;
+            if (!e.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x; d.fy = d.y;
+        }
+        function dragged(e, d) {
+            if (currentMode !== 'select') return;
+            d.fx = e.x; d.fy = e.y;
+        }
+        function dragended(e, d) {
+            if (currentMode !== 'select') return;
+            if (!e.active) simulation.alphaTarget(0);
+            d.fx = null; d.fy = null;
+            saveNetworkData();
+        }
+
+        function toggleAuthMode(mode) {
+            document.getElementById('auth-status').innerHTML = '';
+            if (mode === 'manual') {
+                document.getElementById('auth-auto-mode').classList.add('hidden');
+                document.getElementById('auth-manual-mode').classList.remove('hidden');
+                document.getElementById('manual-user').value = currentUser || '';
+            } else {
+                document.getElementById('auth-auto-mode').classList.remove('hidden');
+                document.getElementById('auth-manual-mode').classList.add('hidden');
+            }
+        }
+
+        async function submitManualAuth() {
+            const user = document.getElementById('manual-user').value;
+            const pass = document.getElementById('manual-pass').value;
+            const statusEl = document.getElementById('auth-status');
+
+            if (!user || !pass) {
+                statusEl.className = "mt-4 text-center text-xs font-bold text-red-500";
+                statusEl.innerText = "Please fill in all fields.";
+                return;
+            }
+
+            statusEl.className = "mt-4 text-center text-xs font-bold text-blue-500";
+            statusEl.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Verifying...';
+
+            try {
+                const res = await fetch(`${NETWORK_API_URL}/manual_auth`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: user,
+                        password: pass,
+                        endpoint: NEXTCLOUD_BASE_URL // "https://cloud.freyster.dev"
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    statusEl.className = "mt-4 text-center text-xs font-bold text-green-500";
+                    statusEl.innerText = "Success! Loading...";
+
+                    // Update current user context
+                    currentUser = user;
+                    document.getElementById('header-user').innerText = user;
+
+                    // Close panel and sync
+                    setTimeout(() => {
+                        closeAuthPanel();
+                        performStrictSync();
+                    }, 1000);
+                } else {
+                    statusEl.className = "mt-4 text-center text-xs font-bold text-red-500";
+                    statusEl.innerText = data.message || "Verification Failed";
+                }
+            } catch (e) {
+                statusEl.className = "mt-4 text-center text-xs font-bold text-red-500";
+                statusEl.innerText = "Network Error: " + e.message;
+            }
+        }
+
+        async function startAutoLogin() {
+            const statusEl = document.getElementById('auth-status');
+            statusEl.className = "mt-4 text-center text-xs font-bold text-blue-500";
+            statusEl.innerText = "Contacting Nextcloud...";
+
+            try {
+                // FIX: Use our new internal endpoint
+                const res = await fetch(`${NETWORK_API_URL}/auth/start`, { method: 'POST' });
+
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.message || res.statusText);
+                }
+
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    statusEl.innerText = "Please click 'Grant Access' in the popup...";
+
+                    // Open Nextcloud Login Window
+                    const popup = window.open(data.login_url, 'nc_login', 'width=500,height=600');
+
+                    const poll = setInterval(async () => {
+                        if (popup.closed) {
+                            clearInterval(poll);
+                            statusEl.innerText = "Login cancelled.";
+                            return;
+                        }
+
+                        try {
+                            // FIX: Poll our new internal endpoint
+                            const pollRes = await fetch(`${NETWORK_API_URL}/auth/poll`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    token: data.poll_token,
+                                    endpoint: data.poll_endpoint, // Use exact URL provided by NC
+                                    username: currentUser
+                                })
+                            });
+
+                            const pollData = await pollRes.json();
+
+                            if (pollRes.ok) {
+                                if (pollData.status === 'success') {
+                                    clearInterval(poll);
+                                    popup.close();
+
+                                    // Update User Context
+                                    if (pollData.username && pollData.username !== currentUser) {
+                                        currentUser = pollData.username;
+                                        document.getElementById('header-user').innerText = currentUser;
+                                        const newUrl = new URL(window.location);
+                                        newUrl.searchParams.set('uid', currentUser);
+                                        window.history.pushState({}, '', newUrl);
+                                    }
+
+                                    statusEl.className = "mt-4 text-center text-xs font-bold text-green-500";
+                                    statusEl.innerText = "Login successful!";
+
+                                    setTimeout(() => {
+                                        closeAuthPanel();
+                                        performStrictSync();
+                                    }, 1000);
+
+                                } else if (pollData.status === 'pending') {
+                                    // Keep waiting...
+                                }
+                            } else if (pollRes.status === 404) {
+                                // Token invalid
+                                clearInterval(poll);
+                                popup.close();
+                                statusEl.innerText = "Login session expired.";
+                            }
+                        } catch (e) {
+                            console.error("Poll error:", e);
+                        }
+                    }, 2000);
+                }
+            } catch (e) {
+                console.error("Auth start failed:", e);
+                statusEl.className = "mt-4 text-center text-xs font-bold text-red-500";
+                statusEl.innerText = `Login failed: ${e.message}`;
+            }
+        }
+
+        function openAuthPanel() {
+            switchAppView('auth-panel');
+            document.getElementById('auth-status').innerText = '';
+        }
+
+        function closeAuthPanel() {
+            switchAppView('view-app');
+        }
+
+        async function browseContacts() {
+            switchAppView('contacts-browser-panel');
+            const contactsListDiv = document.getElementById('contacts-list');
+            contactsListDiv.innerHTML = '<div class="text-center text-slate-500 py-8"><div class="spinner"></div><p>Scanning /Contacts (Recursive)...</p></div>';
+
+            try {
+                // Changed URL to the new recursive endpoint
+                const res = await fetch(`${NETWORK_API_URL}/scan_contacts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser })
+                });
+
+                if (res.status === 401) {
+                    closeContactsBrowser();
+                    openAuthPanel();
+                    return;
+                }
+
+                const data = await res.json();
+                contactsListDiv.innerHTML = '';
+
+                if (data.files && data.files.length > 0) {
+                    data.files.forEach(f => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = `file-list-item is-contact-file`;
+
+                        // Simple logic: if path contains slashes after /Contacts/, show the subfolder name
+                        const simpleName = f.name.replace('.vcf', '');
+                        const subfolderMatch = f.path.match(/\/Contacts\/(.*?)\//);
+                        const subfolderLabel = subfolderMatch ? `<span class="text-[9px] bg-slate-700 text-white px-1 rounded ml-2">${subfolderMatch[1]}</span>` : '';
+
+                        itemDiv.innerHTML = `
+                        <svg class="file-icon" viewBox="0 0 24 24" style="fill:var(--nc-success)">
+                            <path d="M6 2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
+                        </svg>
+                        <div class="flex flex-col">
+                            <span class="font-bold">${simpleName}</span>
+                            <div class="flex items-center text-xs text-slate-500">${f.path} ${subfolderLabel}</div>
+                        </div>
+                    `;
+                        // In browseContacts() inside the onclick handler:
+                        itemDiv.onclick = () => {
+                            const simpleName = f.name.replace('.vcf', '');
+
+                            const newNode = {
+                                id: 'n' + Date.now(),
+                                name: simpleName,
+                                role: "Contact",
+                                value: 0,
+                                notes: "",
+                                // --- NEW: Save the WebDAV path so we know where to update it later ---
+                                filePath: f.path,
+                                // --------------------------------------------------------------------
+                                x: window.innerWidth / 2 + (Math.random() * 60 - 30),
+                                y: window.innerHeight / 2 + (Math.random() * 60 - 30),
+                                color: '#22c55e'
+                            };
+
+                            nodes.push(newNode);
+                            updateNetwork();
+                            openIntel(newNode);
+                            closeContactsBrowser();
+                        };
+                        contactsListDiv.appendChild(itemDiv);
+                    });
+                } else {
+                    contactsListDiv.innerHTML = `
+                    <div class="text-center text-slate-500 py-8">
+                        No .vcf files found in /Contacts or subfolders.<br>
+                        <small>Create a contact in the map to generate the folder.</small>
+                    </div>`;
+                }
+
+            } catch (e) {
+                console.error("Failed to list contacts:", e);
+                contactsListDiv.innerHTML = `<div class="text-center text-red-500 py-8">Error: ${e.message}</div>`;
+            }
+        }
+
+        function closeContactsBrowser() {
+            switchAppView('view-app');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+
+</html>
