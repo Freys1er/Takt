@@ -50,7 +50,7 @@
 
         .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 650px;
             margin-top: 80px;
             padding: 20px;
             box-sizing: border-box;
@@ -60,7 +60,8 @@
             background-color: var(--nc-card);
             border-radius: 10px;
             padding: 20px;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
+            border: 1px solid var(--nc-border);
         }
 
         .card-actions {
@@ -71,15 +72,11 @@
 
         .card-actions button {
             flex: 1;
-            /* Makes all buttons the same width */
             margin: 0;
-            /* Removes that default top margin you had */
             padding: 10px 5px;
-            /* Slightly slimmer padding for small screens */
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
-        /* Optional: Make the Delete button look distinct */
         .btn-danger {
             background-color: transparent;
             border: 1px solid var(--nc-danger) !important;
@@ -87,8 +84,17 @@
         }
 
         h2,
-        h3 {
+        h3,
+        h4 {
             margin-top: 0;
+        }
+
+        h4 {
+            margin-bottom: 10px;
+            color: var(--nc-blue);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         label {
@@ -102,12 +108,17 @@
         input {
             width: 100%;
             padding: 12px;
-            background: #000;
+            background: #111;
             border: 1px solid var(--nc-border);
             border-radius: 5px;
             color: white;
             box-sizing: border-box;
             font-size: 1rem;
+        }
+
+        input:focus {
+            outline: 2px solid var(--nc-blue);
+            border-color: transparent;
         }
 
         button {
@@ -119,6 +130,11 @@
             cursor: pointer;
             margin-top: 15px;
             font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
         }
 
         .btn-primary {
@@ -132,46 +148,63 @@
             color: var(--nc-text);
         }
 
-        .dropdown-wrapper {
-            position: relative;
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            width: auto;
+            margin: 0;
+            border-radius: 4px;
         }
 
-        .file-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: #1a1a1a;
+        /* --- LISTS & TAGS --- */
+        .list-container {
+            background: #111;
             border: 1px solid var(--nc-border);
-            max-height: 250px;
-            overflow-y: auto;
-            z-index: 50;
-            display: none;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 5px;
+            min-height: 40px;
         }
 
-        .dd-item {
-            padding: 12px;
-            border-bottom: 1px solid #333;
-            cursor: pointer;
+        .item-tag {
             display: flex;
+            justify-content: space-between;
             align-items: center;
+            background: #2a2a2a;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 0.9rem;
         }
 
-        .dd-icon {
-            margin-right: 12px;
-            width: 24px;
-            height: 24px;
-            fill: var(--nc-text-muted);
+        .item-tag:last-child {
+            margin-bottom: 0;
         }
 
-        .view {
-            display: none;
+        .item-tag span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-right: 10px;
         }
 
-        .view.active {
-            display: block;
+        .remove-x {
+            color: var(--nc-danger);
+            cursor: pointer;
+            font-weight: bold;
+            padding: 0 5px;
         }
 
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-group input {
+            flex-grow: 1;
+        }
+
+        /* Spinner */
         .spinner {
             border: 4px solid rgba(255, 255, 255, 0.1);
             width: 36px;
@@ -190,6 +223,105 @@
             100% {
                 transform: rotate(360deg);
             }
+        }
+
+
+        /* --- FILE MODAL STYLES --- */
+        .file-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--nc-bg);
+            z-index: 1000;
+            display: none;
+            /* Controlled by JS */
+            flex-direction: column;
+        }
+
+        .file-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--nc-border);
+            background-color: var(--nc-card);
+            min-height: 50px;
+        }
+
+        .file-modal-content {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .file-modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--nc-border);
+            background-color: var(--nc-card);
+            display: flex;
+            gap: 10px;
+        }
+
+        .file-modal-footer button {
+            margin: 0;
+        }
+
+        .modal-path {
+            font-size: 0.8rem;
+            color: var(--nc-text-muted);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 50%;
+        }
+
+        /* File List Items (Shared styles adapted) */
+        .modal-list-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid #333;
+            cursor: pointer;
+        }
+
+        .modal-list-item:hover {
+            background-color: #333;
+        }
+
+        .modal-icon {
+            margin-right: 12px;
+            width: 24px;
+            height: 24px;
+            fill: var(--nc-text-muted);
+        }
+
+        .modal-name {
+            flex-grow: 1;
+        }
+
+        .modal-selected {
+            background-color: var(--nc-blue);
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+        .modal-current-selection {
+            background-color: #ffc107;
+            /* Highlight color for current selection */
+            color: #181818;
+            font-weight: bold;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
         }
     </style>
 </head>
@@ -220,11 +352,41 @@
         <div id="view-config" class="view"></div>
     </div>
 
+    <!-- --- FILE MODAL HTML --- -->
+    <div id="file-modal" class="file-modal">
+        <div class="file-modal-header">
+            <button class="btn-secondary btn-small" style="width:auto; border-radius: 25px;"
+                onclick="closeFileBrowser()">Cancel</button>
+            <div style="display:flex; flex-direction:column; align-items:center;">
+                <h3 style="margin:0;">Select Assets</h3>
+                <div id="modal-current-path" class="modal-path">/</div>
+            </div>
+            <button class="btn-primary btn-small" style="width:auto; border-radius: 25px;"
+                onclick="closeFileBrowser()">Done</button>
+        </div>
+
+        <div id="file-modal-content" class="file-modal-content">
+            <!-- File list goes here -->
+        </div>
+
+        <div class="file-modal-footer">
+            <button id="modal-add-button" class="btn-primary" onclick="addSelectedPath()">Add Root Folder to
+                List</button>
+        </div>
+    </div>
+    <!-- ----------------------- -->
+
+
     <script>
         const API_URL = "https://api.freyster.dev/takt";
         let currentUser = null;
 
-        // --- INIT & CORE LOGIC ---
+        let draftEmails = [];
+        let draftFiles = [];
+        let currentModalPath = '/';
+        let currentModalSelection = { path: '/', isFolder: true }; // Tracks the item for the "Add" button
+
+        // --- INIT & CORE LOGIC (mostly unchanged) ---
         window.onload = async () => {
             const uid = new URLSearchParams(window.location.search).get('uid');
             if (uid) {
@@ -240,17 +402,15 @@
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         };
+
         async function checkStatus() {
             try {
                 const res = await fetch(`${API_URL}/data?username=${currentUser}`);
                 const payload = await res.json();
-
-                // If backend says Unauthorized OR if we have 0 packages, force login
                 if (res.status === 401 || (payload.packages && payload.packages.length === 0)) {
                     renderLogin();
                     return;
                 }
-
                 if (res.ok) {
                     renderDashboard(payload.packages);
                 } else {
@@ -258,30 +418,333 @@
                 }
             } catch (e) {
                 console.error(e);
-                alert("Connection Failed. Check if server.py is running.");
             }
         }
 
         async function deleteProtocol(pkgId) {
-            if (!confirm("Are you sure you want to delete this protocol? This cannot be undone.")) return;
-
+            if (!confirm("Delete this protocol? This cannot be undone.")) return;
             await fetch(`${API_URL}/delete`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: pkgId, username: currentUser })
             });
-            checkStatus(); // Refresh the list
+            checkStatus();
         }
 
         function resync() {
-            if (confirm("This will re-sync your session with the server. If you are having issues, this can help. Continue?")) {
-                // This is the simplest 'logout'. It forces a fresh check against the backend.
+            if (confirm("Re-sync session?")) {
                 switchView('view-loading');
                 checkStatus();
             }
         }
 
-        // --- RENDER FUNCTIONS ---
+        // --- RENDER DASHBOARD (unchanged) ---
+        function renderDashboard(packages) {
+            let html = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h2 style="margin:0;">Active Protocols</h2>
+                    <button class="btn-primary" style="width:auto; margin:0; padding: 8px 15px;" 
+                        onclick="renderConfig(null)">+ New Protocol</button>
+                </div>
+            `;
+
+            if (packages.length === 0) html += `<div class="card" style="text-align:center; color:#888;">No active protocols.</div>`;
+
+            packages.forEach(pkg => {
+                const deadline = new Date(pkg.last_reset);
+                deadline.setDate(deadline.getDate() + pkg.timeout_days);
+                const diffDays = Math.ceil((deadline - new Date()) / (1000 * 60 * 60 * 24));
+                const isTriggered = pkg.is_triggered;
+                const statusColor = isTriggered ? 'var(--nc-danger)' : (diffDays <= 2 ? 'orange' : 'var(--nc-success)');
+
+                const fileCount = Array.isArray(pkg.target_paths) ? pkg.target_paths.length : 0;
+                const emailCount = Array.isArray(pkg.recipient_emails) ? pkg.recipient_emails.length : 0;
+
+                html += `
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
+                    <div>
+                        <h3 style="margin-bottom:5px;">${pkg.package_name || 'Unnamed Protocol'}</h3>
+                        <div style="font-size:0.8rem; color:#888;">
+                            ${fileCount} Asset${fileCount !== 1 ? 's' : ''} &bull; ${emailCount} Recipient${emailCount !== 1 ? 's' : ''}
+                        </div>
+                    </div>
+                    <span style="background:${statusColor}; padding:4px 10px; border-radius:4px; font-size:0.7rem; color:black; font-weight:bold;">
+                        ${isTriggered ? 'TRIGGERED' : 'ARMED'}
+                    </span>
+                </div>
+                
+                <div style="background:#111; padding:15px; border-radius:8px; text-align:center; border:1px solid #333;">
+                    <div style="font-size:0.7rem; color:#888; text-transform:uppercase;">Deadline</div>
+                    <div style="font-size:1.4rem; font-weight:bold; color: white;">${deadline.toLocaleDateString()}</div>
+                    <div style="font-size:0.9rem; color:${statusColor}; margin-top:5px;">
+                        ${isTriggered ? 'Files Released' : (diffDays > 0 ? `${diffDays} days remaining` : 'EXPIRED')}
+                    </div>
+                </div>
+
+                <div class="card-actions">
+                    ${!isTriggered ? `<button class="btn-primary" onclick="resetTimer(${pkg.id})">Check In</button>` : ''}
+                    <button class="btn-secondary" onclick='preloadAndEdit(${JSON.stringify(pkg)})'>Edit</button>
+                    <button class="btn-danger" onclick="deleteProtocol(${pkg.id})">Delete</button>
+                </div>
+            </div>`;
+            });
+
+            document.getElementById('view-dashboard').innerHTML = html;
+            switchView('view-dashboard');
+        }
+
+        // --- RENDER CONFIGURATION (unchanged) ---
+        function preloadAndEdit(pkg) {
+            let emails = Array.isArray(pkg.recipient_emails) ? pkg.recipient_emails : [];
+            let files = Array.isArray(pkg.target_paths) ? pkg.target_paths : [];
+            renderConfig(pkg.id, pkg.package_name, pkg.timeout_days, emails, files);
+        }
+
+        function renderConfig(pkgId = null, name = "", days = 30, emails = [], files = []) {
+            draftEmails = emails || [];
+            draftFiles = files || [];
+            const isEdit = !!pkgId;
+
+            document.getElementById('view-config').innerHTML = `
+        <div class="card">
+            <h3>${isEdit ? 'Edit Protocol' : 'New Protocol'}</h3>
+            
+            <h4>1. General Info</h4>
+            <label>Protocol Name</label>
+            <input type="text" id="cfg-name" value="${name}" placeholder="e.g. Emergency Access">
+            
+            <label>Timeout Period (Days)</label>
+            <input type="number" id="cfg-days" value="${days}" min="1">
+            <p style="font-size:0.8rem; color:#666; margin-top:5px;">If you don't check in within this many days, files are sent.</p>
+
+            <hr style="border:0; border-top:1px solid #333; margin: 20px 0;">
+
+            <h4>2. Recipients</h4>
+            <label>Add Email Address (Press Enter)</label>
+            <div class="input-group">
+                <input type="email" id="cfg-email-input" placeholder="trustee@example.com" onkeydown="handleEmailKey(event)">
+                <button class="btn-primary btn-small" onclick="addEmailFromInput()">Add</button>
+            </div>
+            <div id="email-list" class="list-container"></div>
+
+            <hr style="border:0; border-top:1px solid #333; margin: 20px 0;">
+
+            <h4>3. Assets (Files/Folders)</h4>
+            <label>Selected Assets</label>
+            <div class="input-group">
+                <input type="text" value="${draftFiles.length} item(s) selected" readonly style="color:#fff;">
+                <button class="btn-primary btn-small" onclick="openFileBrowser()">Browse</button>
+            </div>
+            <div id="file-list" class="list-container"></div>
+            
+            <div style="margin-top:25px; display:flex; gap:10px;">
+                <button class="btn-secondary" onclick="checkStatus()">Cancel</button>
+                <button class="btn-primary" onclick="saveConfig(${pkgId})">Save Protocol</button>
+            </div>
+        </div>`;
+
+            switchView('view-config');
+            updateEmailList();
+            updateFileList();
+        }
+
+        // --- EMAIL LOGIC (unchanged) ---
+        function handleEmailKey(e) { if (e.key === 'Enter') addEmailFromInput(); }
+        function addEmailFromInput() {
+            const input = document.getElementById('cfg-email-input');
+            const val = input.value.trim();
+            if (val && val.includes('@') && !draftEmails.includes(val)) {
+                draftEmails.push(val);
+                input.value = '';
+                updateEmailList();
+            } else if (draftEmails.includes(val)) {
+                alert("Email already added.");
+            }
+        }
+        function removeEmail(index) {
+            draftEmails.splice(index, 1);
+            updateEmailList();
+        }
+        function updateEmailList() {
+            const el = document.getElementById('email-list');
+            if (draftEmails.length === 0) { el.innerHTML = '<span style="color:#666; font-size:0.9rem;">No recipients added yet.</span>'; return; }
+            el.innerHTML = draftEmails.map((email, i) => `
+                <div class="item-tag">
+                    <span>✉️ ${email}</span>
+                    <span class="remove-x" onclick="removeEmail(${i})">✕</span>
+                </div>
+            `).join('');
+        }
+
+        // --- ASSET LIST (File/Folder) Logic (mostly unchanged) ---
+        function addFileToList(path) {
+            if (!draftFiles.includes(path)) {
+                draftFiles.push(path);
+                updateFileList();
+            } else {
+                alert(`'${path}' is already added to the list.`);
+            }
+        }
+        function removeFile(index) {
+            draftFiles.splice(index, 1);
+            updateFileList();
+        }
+        function updateFileList() {
+            const el = document.getElementById('file-list');
+            const configInput = document.querySelector('#view-config input[readonly]:first-child');
+            if (configInput) configInput.value = `${draftFiles.length} item(s) selected`;
+
+            if (draftFiles.length === 0) { el.innerHTML = '<span style="color:#666; font-size:0.9rem;">No assets selected.</span>'; return; }
+            el.innerHTML = draftFiles.map((f, i) => `
+                <div class="item-tag">
+                    <span title="${f}">📂 ${f}</span>
+                    <span class="remove-x" onclick="removeFile(${i})">✕</span>
+                </div>
+            `).join('');
+        }
+
+        // --- FILE MODAL LOGIC (Corrected) ---
+
+        function openFileBrowser() {
+            document.getElementById('file-modal').style.display = 'flex';
+            currentModalPath = '/';
+            currentModalSelection = { path: '/', isFolder: true }; // Select root folder by default
+            loadFilesModal(currentModalPath);
+        }
+
+        function closeFileBrowser() {
+            document.getElementById('file-modal').style.display = 'none';
+        }
+
+        function addSelectedPath() {
+            if (currentModalSelection.path) {
+                addFileToList(currentModalSelection.path);
+                // Keep modal open after adding for convenience, but you could close it here too.
+                // closeFileBrowser();
+
+                // Re-render to show 'Added' tag on the new item
+                loadFilesModal(currentModalPath);
+            }
+        }
+
+        // New function to handle item clicks and update selection
+        function selectFileInModal(path, isFolder) {
+            // Update the selection state
+            currentModalSelection = { path: path, isFolder: isFolder };
+
+            // Update the Add button text based on the new selection
+            const addBtn = document.getElementById('modal-add-button');
+            const itemName = path.split('/').filter(p => p).pop() || (isFolder ? 'Root Folder' : 'File');
+            addBtn.innerText = `Add '${itemName}' (${isFolder ? 'Folder' : 'File'}) to List`;
+
+            // If it's a folder, enter it immediately
+            if (isFolder && path !== currentModalPath) {
+                loadFilesModal(path);
+            } else {
+                // Otherwise, just highlight the item visually (handled by class change in buildModalItem)
+                // We re-render the list to apply the highlight and then scroll to the item
+                loadFilesModal(currentModalPath);
+            }
+        }
+
+        async function loadFilesModal(path) {
+            currentModalPath = path;
+            const contentEl = document.getElementById('file-modal-content');
+            const pathEl = document.getElementById('modal-current-path');
+
+            contentEl.innerHTML = '<div class="spinner"></div>';
+            pathEl.innerText = path;
+
+            // Default selection for the folder we are currently viewing
+            currentModalSelection = { path: path, isFolder: true };
+            const pathName = path.split('/').filter(p => p).pop() || 'Root Folder';
+            document.getElementById('modal-add-button').innerText = `Add '${pathName}' (Folder) to List`;
+
+            try {
+                const res = await fetch(`${API_URL}/files/list`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser, path: path })
+                });
+                const data = await res.json();
+
+                let html = '';
+
+                // "Up" button logic
+                if (path !== "/") {
+                    const parent = path.split('/').slice(0, -2).join('/') + '/' || '/';
+                    html += buildModalItem('.. (Go Up)', parent, true, false, () => loadFilesModal(parent));
+                }
+
+                data.files.forEach(f => {
+                    const clickAction = f.is_folder
+                        ? () => loadFilesModal(f.path) // Click folder name to enter
+                        : () => selectFileInModal(f.path, false); // Click file name to select
+
+                    html += buildModalItem(f.name, f.path, f.is_folder, true, clickAction);
+                });
+
+                if (data.files.length === 0 && path !== "/") {
+                    html += `<div class="modal-list-item" style="color:#888;">Folder is empty.</div>`;
+                }
+
+                contentEl.innerHTML = html;
+            } catch (e) {
+                contentEl.innerHTML = '<div class="modal-list-item" style="color:var(--nc-danger);">Error loading files.</div>';
+                console.error(e);
+            }
+        }
+
+        function buildModalItem(name, path, isFolder, selectable, onClickAction) {
+            const icon = isFolder
+                ? 'M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'
+                : 'M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z';
+            const color = isFolder ? 'var(--nc-blue)' : '#888';
+            const selectedTag = draftFiles.includes(path) ? '<span class="modal-selected">Added</span>' : '';
+
+            // Check if this item is the currently selected file/folder
+            const isCurrentlySelected = currentModalSelection.path === path && !isFolder;
+            const itemClass = isCurrentlySelected ? 'modal-list-item modal-current-selection' : 'modal-list-item';
+
+            // Create a function reference for the event handler
+            const tempId = `click_${Math.random().toString(36).substr(2, 9)}`;
+            window[tempId] = onClickAction;
+
+            return `
+                <div class="${itemClass}" onclick="window.${tempId}()">
+                    <svg class="modal-icon" viewBox="0 0 24 24" style="fill:${color}"><path d="${icon}"/></svg>
+                    <span class="modal-name">${name}</span>
+                    ${selectedTag}
+                </div>
+            `;
+        }
+
+        // --- ACTIONS (unchanged) ---
+        async function saveConfig(pkgId) {
+            if (draftEmails.length === 0) { alert("Please add at least one recipient email."); return; }
+            if (draftFiles.length === 0) { alert("Please select at least one file or folder."); return; }
+            const timeoutDays = parseInt(document.getElementById('cfg-days').value);
+            if (isNaN(timeoutDays) || timeoutDays <= 0) { alert("Timeout Days must be a positive number."); return; }
+
+            const payload = {
+                id: pkgId,
+                username: currentUser,
+                package_name: document.getElementById('cfg-name').value,
+                target_paths: draftFiles,
+                recipient_emails: draftEmails,
+                timeout_days: timeoutDays
+            };
+
+            await fetch(`${API_URL}/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            checkStatus();
+        }
+
+        // --- AUTH (unchanged) ---
         function renderLogin() {
             document.getElementById('view-login').innerHTML = `
                 <div class="card" style="text-align:center;">
@@ -292,144 +755,7 @@
                 </div>`;
             switchView('view-login');
         }
-        function renderDashboard(packages) {
-            let html = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 style="margin:0;">Protocols</h2>
-            <button class="btn-primary" style="width:auto; margin:0; padding: 8px 15px;" 
-                onclick="renderConfig('', '', 30, null, 'New Protocol')">+ New</button>
-        </div>
-    `;
 
-            if (packages.length === 0) {
-                html += `<div class="card" style="text-align:center; color:#888;">No active protocols. Click "New" to start.</div>`;
-            }
-
-            packages.forEach(pkg => {
-                const deadline = new Date(pkg.last_reset);
-                deadline.setDate(deadline.getDate() + pkg.timeout_days);
-                const diffDays = Math.ceil((deadline - new Date()) / (1000 * 60 * 60 * 24));
-                const statusColor = pkg.is_triggered ? 'var(--nc-danger)' : (diffDays <= 2 ? 'orange' : 'var(--nc-success)');
-
-                html += `
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div>
-                        <h3 style="margin-bottom:5px;">${pkg.package_name || 'Unnamed Protocol'}</h3>
-                        <div style="font-size:0.8rem; color:#888;">Folder: ${pkg.target_folder || 'Not Set'}</div>
-                    </div>
-                    <span style="background:${statusColor}; padding:4px 10px; border-radius:4px; font-size:0.7rem; color:black; font-weight:bold;">
-                        ${pkg.is_triggered ? 'TRIGGERED' : 'ARMED'}
-                    </span>
-                </div>
-                
-                <div style="text-align:center; margin: 20px 0;">
-                    <div style="font-size:0.7rem; color:#888; text-transform:uppercase;">Next Deadline</div>
-                    <div style="font-size:1.2rem; font-weight:bold;">${deadline.toLocaleDateString()}</div>
-                    <div style="font-size:0.9rem; color:${statusColor}; margin-top:5px;">
-                        ${pkg.is_triggered ? 'Files Released' : (diffDays > 0 ? `${diffDays} days remaining` : 'EXPIRED')}
-                    </div>
-                </div>
-                <div class="card">
-                      <div class="card-actions">
-                        ${!pkg.is_triggered ? `
-                          <button class="btn-primary" onclick="resetTimer(${pkg.id})">Check In</button>
-                       ` : ''}
-                        <button class="btn-secondary" onclick="renderConfig('${pkg.target_folder}', '${pkg.recipient_email}', ${pkg.timeout_days}, ${pkg.id}, '${pkg.package_name}')">Edit</button>
-                        <button class="btn-danger" onclick="deleteProtocol(${pkg.id})">Delete</button>
-                    </div>
-                </div>
-            </div>
-        `;
-            });
-
-            document.getElementById('view-dashboard').innerHTML = html;
-            switchView('view-dashboard');
-        }
-        function renderConfig(folder, email, days, pkgId = null, pkgName = "") {
-            document.getElementById('view-config').innerHTML = `
-        <div class="card">
-            <h3>${pkgId ? 'Edit Protocol' : 'New Protocol'}</h3>
-            <label>Protocol Name</label>
-            <input type="text" id="cfg-name" value="${pkgName}" placeholder="e.g. My Secret Backup">
-            
-            <label>Target Folder</label>
-            <div class="dropdown-wrapper">
-                <input type="text" id="cfg-folder" value="${folder}" placeholder="/Click to browse...">
-                <div id="file-dropdown" class="file-dropdown"></div>
-            </div>
-            
-            <label>Recipient Email</label>
-            <input type="email" id="cfg-email" value="${email}" placeholder="trustee@example.com">
-            
-            <label>Timeout (Days)</label>
-            <input type="number" id="cfg-days" value="${days}">
-            
-            <button class="btn-primary" onclick="saveConfig(${pkgId})">Save Protocol</button>
-            <button class="btn-secondary" onclick="checkStatus()">Cancel</button>
-        </div>`;
-            switchView('view-config');
-            const folderInput = document.getElementById('cfg-folder');
-            folderInput.onclick = () => loadFiles(folderInput.value);
-        }
-
-        // --- ACTIONS ---
-        async function resetTimer(pkgId) {
-            await fetch(`${API_URL}/reset`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: currentUser, id: pkgId })
-            });
-            checkStatus();
-        }
-
-        async function saveConfig(pkgId) {
-            // Get credentials from a hidden or global source if needed, 
-            // but for now the backend handles password storage per package.
-            const payload = {
-                id: pkgId,
-                username: currentUser,
-                package_name: document.getElementById('cfg-name').value,
-                target_folder: document.getElementById('cfg-folder').value,
-                recipient_email: document.getElementById('cfg-email').value,
-                timeout_days: parseInt(document.getElementById('cfg-days').value)
-            };
-            await fetch(`${API_URL}/update`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            checkStatus();
-        }
-
-        // --- FILE BROWSER ---
-        let typingTimer;
-        function handleInput(val) { clearTimeout(typingTimer); typingTimer = setTimeout(() => loadFiles(val.substring(0, val.lastIndexOf('/') + 1) || "/"), 500); }
-        async function loadFiles(path) {
-            const dd = document.getElementById('file-dropdown');
-            dd.innerHTML = '<div class="dd-item" style="color:#888;">Loading...</div>';
-            dd.style.display = 'block';
-            const res = await fetch(`${API_URL}/files/list`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser, path: path }) });
-            const data = await res.json();
-            dd.innerHTML = '';
-            if (path !== "/") addDropdownItem(".. (Up)", path.split('/').slice(0, -2).join('/') + '/' || '/', true);
-            data.files.forEach(f => addDropdownItem(f.name, f.path, f.is_folder));
-        }
-        function addDropdownItem(name, path, isFolder) {
-            const dd = document.getElementById('file-dropdown');
-            const div = document.createElement('div');
-            div.className = 'dd-item';
-            const icon = isFolder ? 'M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z' : 'M6 2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z';
-            div.innerHTML = `<svg class="dd-icon" viewBox="0 0 24 24" style="fill:${isFolder ? 'var(--nc-blue)' : '#888'}"><path d="${icon}"/></svg><span>${name}</span>`;
-            div.onclick = () => {
-                if (isFolder) { loadFiles(path); document.getElementById('cfg-folder').value = path; }
-                else { document.getElementById('cfg-folder').value = path; dd.style.display = 'none'; }
-            };
-            dd.appendChild(div);
-        }
-        document.addEventListener('click', e => { if (!document.querySelector('.dropdown-wrapper')?.contains(e.target)) { const dd = document.getElementById('file-dropdown'); if (dd) dd.style.display = 'none'; } });
-
-        // --- AUTH ---
         async function startAutoLogin() {
             const statusEl = document.getElementById('login-status');
             statusEl.innerText = "Contacting Nextcloud...";
